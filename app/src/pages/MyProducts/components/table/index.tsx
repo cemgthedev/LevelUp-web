@@ -1,38 +1,38 @@
 import { PopoverDelete } from "@/components/ui/PopoverDelete";
 import { TableCustom } from "@/components/ui/TableCustom";
-import { TProduct } from "@/types/TProduct";
+import { TCourse } from "@/types/TCourse";
 import {
-    Button,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownTrigger,
-    Spinner,
-    TableBody,
-    TableCell,
-    TableColumn,
-    TableHeader,
-    TableRow,
-    User
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Spinner,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  User,
 } from "@nextui-org/react";
 
 import { EllipsisVertical, Eye, SquarePen, Trash } from "lucide-react";
 import { Key } from "react";
 
 interface TableProps {
-  products?: TProduct[];
+  courses?: TCourse[];
   emptyContent?: string;
   loadingState?: boolean;
   topContent?: React.ReactNode;
   bottomContent?: React.ReactNode;
   // Events
-  onOpenDetails?: (product: TProduct) => void;
-  onOpenEdit?: (product: TProduct) => void;
-  remove?: (id: string) => void;
+  onOpenDetails?: (course: TCourse) => void;
+  onOpenEdit?: (course: TCourse) => void;
+  remove?: (id: number) => void;
 }
 
-export const TableProducts = ({
-  products = [],
+export const TableCourses = ({
+  courses = [],
   emptyContent,
   loadingState = false,
   topContent,
@@ -47,46 +47,47 @@ export const TableProducts = ({
       label: "Produto",
     },
     {
-        id: "category",
-        label: "Categoria",
+      id: "price",
+      label: "Preço",
     },
     {
-        id: "price",
-        label: "Preço",
+      id: "workload",
+      label: "Carga Horária",
     },
     {
-        id: "quantity",
-        label: "Quantidade",
+      id: "actions",
+      label: "Ações",
     },
-    {
-        id: "actions",
-        label: "Ações",
-    }
   ];
 
-  const renderCell = (product: TProduct, columnKey: Key) => {
+  const renderCell = (course: TCourse, columnKey: Key) => {
     switch (columnKey) {
       case "title":
         return (
-            <User
-                avatarProps={{
-                    src: product.image_url,
-                }}
-                description={product.description}
-                name={product.title}
-                classNames={{
-                    wrapper: "w-[212px]",
-                    name: "text-md line-clamp-1",
-                    description: "line-clamp-2",
-                }}
-            />
+          <User
+            avatarProps={{
+              src: course.banner_url,
+            }}
+            description={course.description}
+            name={course.title}
+            classNames={{
+              wrapper: "w-[212px]",
+              name: "text-md line-clamp-1",
+              description: "line-clamp-2",
+            }}
+          />
         );
-      case "category":
-        return <span className="text-md text-purple-600">{product.category}</span>;
       case "price":
-        return <span className="text-md">{product.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>;
-      case "quantity":
-        return <span className="text-md">{product.quantity}</span>;
+        return (
+          <span className="text-md">
+            {course.price.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </span>
+        );
+      case "workload":
+        return <span className="text-md">{course.workload}</span>;
       case "actions":
         return (
           <div className="relative flex items-center justify-end gap-2">
@@ -101,32 +102,32 @@ export const TableProducts = ({
                 <DropdownItem
                   key="details"
                   hidden={!onOpenDetails}
-                  onClick={() => onOpenDetails?.(product)}
+                  onClick={() => onOpenDetails?.(course)}
                 >
-                    <div className="flex items-center gap-2">
-                        <Eye className="w-4 h-4"/>
-                        Visualizar
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    Visualizar
+                  </div>
                 </DropdownItem>
                 <DropdownItem
                   key="edit"
                   hidden={!onOpenEdit}
-                  onClick={() => onOpenEdit?.(product)}
+                  onClick={() => onOpenEdit?.(course)}
                 >
-                    <div className="flex items-center gap-2">
-                        <SquarePen className="w-4 h-4"/>
-                        Editar
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <SquarePen className="w-4 h-4" />
+                    Editar
+                  </div>
                 </DropdownItem>
                 <DropdownItem isReadOnly key="remove" hidden={!remove}>
                   <PopoverDelete
-                    onContinue={() => remove?.(product.id)}
+                    onContinue={() => remove?.(course.id)}
                     message="Tem certeza de que deseja excluir? Deseja continuar?"
                     triggerButton={
-                        <div className="flex items-center gap-2">
-                            <Trash className="w-4 h-4"/>
-                            Deletar
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Trash className="w-4 h-4" />
+                        Deletar
+                      </div>
                     }
                   />
                 </DropdownItem>
@@ -139,7 +140,7 @@ export const TableProducts = ({
 
   return (
     <TableCustom
-      aria-label="Table of bimesters"
+      aria-label="Table of courses"
       topContent={topContent}
       bottomContent={bottomContent}
       isVirtualized
@@ -165,7 +166,7 @@ export const TableProducts = ({
             classNames={{ base: "opacity-50 p-2 rounded-lg" }}
           />
         }
-        items={products}
+        items={courses}
       >
         {(item) => (
           <TableRow key={item.id}>

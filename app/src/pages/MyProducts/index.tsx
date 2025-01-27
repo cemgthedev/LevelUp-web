@@ -1,15 +1,15 @@
-import { CreateProduct } from "@/common/forms/product/modals/CreateProduct";
-import { InfoProduct } from "@/common/forms/product/modals/InfoProduct";
-import { UpdateProduct } from "@/common/forms/product/modals/UpdateProduct";
-import { deleteProductMutation } from "@/common/forms/product/mutations/product.mutation";
+import { CreateCourse } from "@/common/forms/course/modals/CreateCourse";
+import { InfoCourse } from "@/common/forms/course/modals/InfoCourse";
+import { UpdateCourse } from "@/common/forms/course/modals/UpdateCourse";
+import { deleteCourseMutation } from "@/common/forms/course/mutations/course.mutation";
 import {
-  IFilterProducts,
-  queryKeysProduct,
-  searchProductQuery,
-} from "@/common/queries/get-products.query";
-import { FilterProducts } from "@/components/ui/FilterProducts";
+  IFilterCourses,
+  queryKeysCourse,
+  searchCourseQuery,
+} from "@/common/queries/get-courses.query";
+import { FilterCourses } from "@/components/ui/FilterCourses";
 import { useAuthentication } from "@/hooks/use-authentication.hook";
-import { TProduct } from "@/types/TProduct";
+import { TCourse } from "@/types/TCourse";
 import { notify } from "@/utils/notify.util";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
@@ -17,23 +17,23 @@ import { useDisclosure } from "@nextui-org/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { PlusCircle, Search } from "lucide-react";
 import { useCallback, useState } from "react";
-import { TableProducts } from "./components/table";
+import { TableCourses } from "./components/table";
 
 export const MyCoursesPage = () => {
   const { user } = useAuthentication();
-  const [filterProducts, setFilterProducts] = useState<IFilterProducts>({});
+  const [filterCourses, setFilterCourses] = useState<IFilterCourses>({});
 
-  const [editItem, setEditItem] = useState<TProduct>();
+  const [editItem, setEditItem] = useState<TCourse>();
 
-  const onEditItem = useCallback((product: TProduct) => {
-    setEditItem(product);
+  const onEditItem = useCallback((Course: TCourse) => {
+    setEditItem(Course);
     onOpenEdit();
   }, []);
 
-  const mutateProductDelete = useMutation({
-    mutationFn: deleteProductMutation,
+  const mutateCourseDelete = useMutation({
+    mutationFn: deleteCourseMutation,
     onSuccess() {
-      notify("Produto deletado com sucesso!", { type: "success" });
+      notify("Curso deletado com sucesso!", { type: "success" });
       refetch();
     },
     onError() {
@@ -41,38 +41,36 @@ export const MyCoursesPage = () => {
     },
   });
 
-  const onDeleteItem = useCallback((id: string) => {
-    mutateProductDelete.mutate(id);
+  const onDeleteItem = useCallback((id: number) => {
+    mutateCourseDelete.mutate(id);
   }, []);
 
   const {
-    data: products,
+    data: Courses,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: [queryKeysProduct.get_list_products + "my", filterProducts, user],
+    queryKey: [queryKeysCourse.get_list_courses + "my", filterCourses, user],
     queryFn: async () => {
-      const enterpriseResponse = await searchProductQuery({
-        ...filterProducts,
+      const courseResponse = await searchCourseQuery({
+        ...filterCourses,
         seller_id: user?.id,
       });
 
-      return Array.isArray(enterpriseResponse.products)
-        ? enterpriseResponse.products
-        : [];
+      return Array.isArray(courseResponse.data) ? courseResponse.data : [];
     },
   });
 
-  const clearSubject = () => {
-    setFilterProducts?.({ ...filterProducts, subject: undefined });
+  const clearTitle = () => {
+    setFilterCourses?.({ ...filterCourses, title: undefined });
   };
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const [selectedItem, setSelectedItem] = useState<TProduct>();
+  const [selectedItem, setSelectedItem] = useState<TCourse>();
 
-  const onSelectItem = (product: TProduct) => {
-    setSelectedItem(product);
+  const onSelectItem = (course: TCourse) => {
+    setSelectedItem(course);
     onOpen();
   };
 
@@ -88,11 +86,11 @@ export const MyCoursesPage = () => {
     onOpenChange: onOpenCreateChange,
   } = useDisclosure();
 
-  const items = products ? products : [];
+  const items = Courses ? Courses : [];
 
   return (
     <section className="flex flex-col gap-4 m-4">
-      <TableProducts
+      <TableCourses
         topContent={
           <div className="flex gap-2 justify-between">
             <div className="flex gap-2">
@@ -102,20 +100,19 @@ export const MyCoursesPage = () => {
                 startContent={<Search className="h-5 w-5 opacity-50" />}
                 variant="bordered"
                 type="text"
-                aria-label="Pesquisa por produto"
-                value={filterProducts?.subject}
+                aria-label="Pesquisa por curso"
+                value={filterCourses?.title}
                 onChange={(e) => {
-                  console.log(e.target.value);
-                  setFilterProducts?.({
-                    ...filterProducts,
-                    subject: e.target.value,
+                  setFilterCourses?.({
+                    ...filterCourses,
+                    title: e.target.value,
                   });
                 }}
-                onClear={clearSubject}
+                onClear={clearTitle}
               />
-              <FilterProducts
-                filterProducts={filterProducts}
-                setFilterProducts={setFilterProducts}
+              <FilterCourses
+                filterCourses={filterCourses}
+                setFilterCourses={setFilterCourses}
               />
             </div>
             <Button
@@ -126,12 +123,12 @@ export const MyCoursesPage = () => {
               startContent={<PlusCircle className="h-5 w-5" />}
               className="text-white"
             >
-              Adicionar Produto
+              Adicionar Curso
             </Button>
           </div>
         }
-        products={items}
-        emptyContent="Nenhum produto encontrado"
+        courses={items}
+        emptyContent="Nenhum curso encontrado"
         loadingState={isLoading}
         onOpenDetails={onSelectItem}
         onOpenEdit={onEditItem}
@@ -139,24 +136,25 @@ export const MyCoursesPage = () => {
       />
 
       {selectedItem && (
-        <InfoProduct
+        <InfoCourse
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          item={selectedItem as TProduct}
+          item={selectedItem as TCourse}
         />
       )}
 
-      <CreateProduct
+      <CreateCourse
         isOpen={isOpenCreate}
         onOpenChange={onOpenCreateChange}
-        seller_id={user?.id as string}
+        seller_id={user?.id as number}
+        phone_number={user?.phone_number as string}
         refetch={refetch}
       />
 
-      <UpdateProduct
+      <UpdateCourse
         isOpen={isOpenEdit}
         onOpenChange={onOpenEditChange}
-        item={editItem as TProduct}
+        item={editItem as TCourse}
         refetch={refetch}
       />
     </section>

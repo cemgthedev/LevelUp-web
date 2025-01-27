@@ -1,50 +1,57 @@
-import { queryKeysProduct } from "@/common/queries/get-products.query";
-import { TProduct } from "@/types/TProduct";
+import { queryKeysCourse } from "@/common/queries/get-courses.query";
+import { TCourse } from "@/types/TCourse";
 import { notify } from "@/utils/notify.util";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    Button,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "@nextui-org/react";
-import { RefetchOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  RefetchOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { updateProductMutation } from "../mutations/product.mutation";
-import { ProductForm } from "../ProductForm";
-import { UpdateProductFormData, updateProductFormSchema } from "../validations/update-form.schema";
+import { CourseForm } from "../CourseForm";
+import { updateCourseMutation } from "../mutations/course.mutation";
+import {
+  UpdateCourseFormData,
+  updateCourseFormSchema,
+} from "../validations/update-form.schema";
 
-interface UpdateProductProps {
+interface UpdateCourseProps {
   isOpen: boolean;
   onOpenChange: () => void;
-  item: TProduct;
+  item: TCourse;
   refetch: (options?: RefetchOptions | undefined) => void;
 }
 
-export const UpdateProduct = ({
+export const UpdateCourse = ({
   isOpen,
   onOpenChange,
   item,
   refetch,
-}: UpdateProductProps) => {
+}: UpdateCourseProps) => {
   const queryClient = useQueryClient();
-  const methods = useForm<UpdateProductFormData>({
+  const methods = useForm<UpdateCourseFormData>({
     defaultValues: {
       ...item,
     },
-    resolver: zodResolver(updateProductFormSchema),
+    resolver: zodResolver(updateCourseFormSchema),
   });
 
-  const mutateProductUpdate = useMutation({
-    mutationFn: updateProductMutation,
+  const mutateCourseUpdate = useMutation({
+    mutationFn: updateCourseMutation,
     onSuccess() {
       methods.reset();
-      notify("Produto atualizado com sucesso!", { type: "success" });
+      notify("Curso atualizado com sucesso!", { type: "success" });
       queryClient.invalidateQueries({
-        queryKey: [queryKeysProduct.get_list_products],
+        queryKey: [queryKeysCourse.get_list_courses],
       });
       onOpenChange();
       refetch();
@@ -56,19 +63,19 @@ export const UpdateProduct = ({
 
   useEffect(() => {
     if (!item) return;
-   
+
     methods.reset({ ...item });
   }, [item, methods]);
 
   const onHandleSubmitUpdate = methods.handleSubmit((data) => {
-    mutateProductUpdate.mutate(data);
+    mutateCourseUpdate.mutate(data);
   });
 
   return (
     <>
-      <Modal 
-        isOpen={isOpen} 
-        onOpenChange={onOpenChange} 
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
         size="3xl"
         classNames={{ body: "max-h-[63vh] overflow-y-scroll" }}
       >
@@ -77,11 +84,11 @@ export const UpdateProduct = ({
             <FormProvider {...methods}>
               <form onSubmit={onHandleSubmitUpdate}>
                 <ModalHeader className="flex flex-col gap-1">
-                  Editar Produto
+                  Editar Curso
                 </ModalHeader>
 
                 <ModalBody>
-                  <ProductForm />
+                  <CourseForm />
                 </ModalBody>
 
                 <ModalFooter>
@@ -97,7 +104,7 @@ export const UpdateProduct = ({
                     type="submit"
                     color="primary"
                     variant="shadow"
-                    isLoading={mutateProductUpdate.isPending}
+                    isLoading={mutateCourseUpdate.isPending}
                   >
                     Salvar
                   </Button>

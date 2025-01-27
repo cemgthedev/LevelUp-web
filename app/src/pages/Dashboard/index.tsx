@@ -1,11 +1,12 @@
-import { InfoProduct } from "@/common/forms/product/modals/InfoProduct";
+import { InfoCourse } from "@/common/forms/course/modals/InfoCourse";
 import {
-  IFilterProducts,
-  queryKeysProduct,
-  searchProductQuery,
-} from "@/common/queries/get-products.query";
-import { FilterProducts } from "@/components/ui/FilterProducts";
-import { TProduct } from "@/types/TProduct";
+  IFilterCourses,
+  queryKeysCourse,
+  searchCourseQuery,
+} from "@/common/queries/get-courses.query";
+import { FilterCourses } from "@/components/ui/FilterCourses";
+import { useAuthentication } from "@/hooks/use-authentication.hook";
+import { TCourse } from "@/types/TCourse";
 import { Input } from "@nextui-org/input";
 import {
   Button,
@@ -19,29 +20,30 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 
 export const DashboardPage = () => {
-  const [filterProducts, setFilterProducts] = useState<IFilterProducts>({});
+  const { user } = useAuthentication();
+  const [filterCourses, setFilterCourses] = useState<IFilterCourses>({});
 
-  const { data: products } = useQuery({
-    queryKey: [queryKeysProduct.get_list_products, filterProducts],
+  const { data: courses } = useQuery({
+    queryKey: [queryKeysCourse.get_list_courses, filterCourses],
     queryFn: async () => {
-      const enterpriseResponse = await searchProductQuery(filterProducts);
+      const courseResponse = await searchCourseQuery(filterCourses);
 
-      return Array.isArray(enterpriseResponse.products)
-        ? enterpriseResponse.products
+      return Array.isArray(courseResponse.data)
+        ? courseResponse.data.filter((item) => item.seller_id != user?.id)
         : [];
     },
   });
 
-  const clearSubject = () => {
-    setFilterProducts?.({ ...filterProducts, subject: undefined });
+  const clearTitle = () => {
+    setFilterCourses?.({ ...filterCourses, title: undefined });
   };
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const [selectedItem, setSelectedItem] = useState<TProduct>();
+  const [selectedItem, setSelectedItem] = useState<TCourse>();
 
-  const onSelectItem = (product: TProduct) => {
-    setSelectedItem(product);
+  const onSelectItem = (course: TCourse) => {
+    setSelectedItem(course);
     onOpen();
   };
 
@@ -51,8 +53,8 @@ export const DashboardPage = () => {
         <div className="flex flex-col">
           <p className="text-lg font-semibold">Cursos</p>
           <p>
-            {products?.length
-              ? `${products.length} cursos(s) encontrado(s)`
+            {courses?.length
+              ? `${courses.length} cursos(s) encontrado(s)`
               : "Nenhum curso encontrado"}
           </p>
         </div>
@@ -64,27 +66,26 @@ export const DashboardPage = () => {
             variant="bordered"
             type="text"
             aria-label="Pesquisa por produto"
-            value={filterProducts?.subject}
+            value={filterCourses?.title}
             onChange={(e) => {
-              console.log(e.target.value);
-              setFilterProducts?.({
-                ...filterProducts,
-                subject: e.target.value,
+              setFilterCourses?.({
+                ...filterCourses,
+                title: e.target.value,
               });
             }}
-            onClear={clearSubject}
+            onClear={clearTitle}
           />
-          <FilterProducts
-            filterProducts={filterProducts}
-            setFilterProducts={setFilterProducts}
+          <FilterCourses
+            filterCourses={filterCourses}
+            setFilterCourses={setFilterCourses}
           />
         </div>
       </div>
 
       <div className="flex gap-4 flex-wrap">
-        {products?.map((product) => (
+        {courses?.map((course) => (
           <Card
-            key={product.id}
+            key={course.id}
             classNames={{
               base: "border-1 border-default-800",
               body: "px-0 pt-0 gap-3",
@@ -93,21 +94,21 @@ export const DashboardPage = () => {
             <CardBody>
               <div className="border-b-1 border-default-800">
                 <Image
-                  alt="Imagem do produto"
+                  alt="Imagem do curso"
                   fallbackSrc={"/image-off.svg"}
                   height={216}
-                  src={product.image_url}
+                  src={course.banner_url}
                   width={256}
                   className="w-[256px] h-[216px] rounded-none"
                 />
               </div>
               <div className="flex flex-col gap-1 px-4 w-[256px] min-h-[108px] max-h-[108px]">
                 <p className="line-clamp-1 text-lg font-semibold">
-                  {product.title}
+                  {course.title}
                 </p>
-                <p className="line-clamp-2">{product.description}</p>
+                <p className="line-clamp-2">{course.description}</p>
                 <p>
-                  {product.price.toLocaleString("pt-BR", {
+                  {course.price.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}
@@ -119,7 +120,7 @@ export const DashboardPage = () => {
                   type="button"
                   color="secondary"
                   variant="shadow"
-                  onClick={() => onSelectItem(product)}
+                  onClick={() => onSelectItem(course)}
                 >
                   ver detalhes
                 </Button>
@@ -130,10 +131,10 @@ export const DashboardPage = () => {
       </div>
 
       {selectedItem && (
-        <InfoProduct
+        <InfoCourse
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          item={selectedItem as TProduct}
+          item={selectedItem as TCourse}
         />
       )}
     </section>

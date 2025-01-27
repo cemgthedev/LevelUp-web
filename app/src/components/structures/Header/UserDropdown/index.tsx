@@ -20,17 +20,11 @@ export const UserDropdown = () => {
   const { user } = useAuthentication();
   const navigate = useNavigate();
 
-  const {
-    isOpen,
-    onOpen,
-    onOpenChange,
-  } = useDisclosure();
-
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const onAction = (key: string) => {
     switch (key) {
       case "details":
-        console.log("details");
         onOpen();
         break;
       case "logout":
@@ -92,15 +86,13 @@ export const UserDropdown = () => {
           </DropdownSection>
         </DropdownMenu>
       </Dropdown>
-      {
-        user && (
-          <InfoUser
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            item={user as TUser}
-          />   
-        )
-      }
+      {user && (
+        <InfoUser
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          item={user as TUser}
+        />
+      )}
     </>
   );
 };

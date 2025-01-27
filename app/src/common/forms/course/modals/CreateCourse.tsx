@@ -1,49 +1,55 @@
 import { notify } from "@/utils/notify.util";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    Button,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "@nextui-org/react";
 import { RefetchOptions, useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { createProductMutation } from "../mutations/product.mutation";
-import { ProductForm } from "../ProductForm";
-import { CreateProductFormData, createProductFormSchema } from "../validations/create-form.schema";
+import { CourseForm } from "../CourseForm";
+import { createCourseMutation } from "../mutations/course.mutation";
+import {
+  CreateCourseFormData,
+  createCourseFormSchema,
+} from "../validations/create-form.schema";
 
-interface CreateProductProps {
+interface CreateCourseProps {
   isOpen: boolean;
   onOpenChange: () => void;
-  seller_id: string;
+  seller_id: number;
+  phone_number: string;
   refetch: (options?: RefetchOptions | undefined) => void;
 }
 
-export const CreateProduct = ({
+export const CreateCourse = ({
   isOpen,
   onOpenChange,
   seller_id,
+  phone_number,
   refetch,
-}: CreateProductProps) => {
-  const methods = useForm<CreateProductFormData>({
+}: CreateCourseProps) => {
+  const methods = useForm<CreateCourseFormData>({
     defaultValues: {
-        seller_id
+      seller_id,
+      phone_number,
     },
-    resolver: zodResolver(createProductFormSchema),
+    resolver: zodResolver(createCourseFormSchema),
   });
 
   useEffect(() => {
-    methods.reset({ seller_id });
-  }, [seller_id, methods]);
+    methods.reset({ seller_id, phone_number });
+  }, [seller_id, phone_number, methods]);
 
-  const mutateProductCreate = useMutation({
-    mutationFn: createProductMutation,
+  const mutateCourseCreate = useMutation({
+    mutationFn: createCourseMutation,
     onSuccess() {
       methods.reset();
-      notify("Produto cadastrado com sucesso!", { type: "success" });
+      notify("Curso cadastrado com sucesso!", { type: "success" });
       onOpenChange();
       refetch();
     },
@@ -53,7 +59,7 @@ export const CreateProduct = ({
   });
 
   const onHandleSubmitCreate = methods.handleSubmit((data) => {
-    mutateProductCreate.mutate(data);
+    mutateCourseCreate.mutate(data);
   });
 
   return (
@@ -69,11 +75,11 @@ export const CreateProduct = ({
             <FormProvider {...methods}>
               <form onSubmit={onHandleSubmitCreate}>
                 <ModalHeader className="flex flex-col gap-1">
-                  Cadastro de Produto
+                  Cadastro de Curso
                 </ModalHeader>
 
                 <ModalBody>
-                  <ProductForm />
+                  <CourseForm />
                 </ModalBody>
 
                 <ModalFooter>
@@ -89,7 +95,7 @@ export const CreateProduct = ({
                     type="submit"
                     color="success"
                     variant="shadow"
-                    isLoading={mutateProductCreate.isPending}
+                    isLoading={mutateCourseCreate.isPending}
                   >
                     Cadastrar
                   </Button>
